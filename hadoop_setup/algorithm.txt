@@ -1,0 +1,30 @@
+Two map and reduce jobs are used for solving this problem. 
+
+The first mapreduce job writes the relative frequencies of all the words which have occurred in pair. 
+This is written into file named 'output1' into HDFS. 
+
+After this, the second job starts.
+It reads the input from 'output1' and reverse sorts based on relative frequencies.
+
+Final result (space separated word pairs and the respective relative frequencies) is written into file named 'output'into HDFS.
+
+
+Algorithm:
+
+	1. For each word, emit the word along with adjacent words (both left and right words, one by one) after lower case conversion of each word.
+
+	2. Also, emit the word individually with a '*', with the word count, to keep track of the total word count.
+
+	3. The combiner simply aggregates the word counts for word pairs and individual word, before sending to firstReducer.
+
+	4. The Partitioner sends the adjacent words with the same key to the same reducer.
+
+	5. The first reducer counts the total word count with the help of '*' flag, and also the adjacent word counts.
+
+	6. The first reducer writes the relative frequency into HDFS (output1) as ratio of words co-occurred and the total word count.
+
+	7. The second Mapper reads the above output and emits the swapped key values: Relative frequency is the new key, and Adjacent word pairs are values.
+
+	8. resultClass reverse sorts the relative frequencies, before sending to the only reducer (lastReducer).
+
+	9. The second reducer writes the top 100 word pairs with highest relative frequencies into HDFS.
